@@ -9,3 +9,6 @@ TCC includes mechanisms for accountability, including oversight from community m
 Researchers are encouraged to use the code posted here to conduct their own analyses of neighborhood transformation, and to monitor the effects of TCC investments long after the UCLA Luskin Center for Innovation has funding to do so. 
 
 All materials posted here are licensed under the terms of the [MIT license](https://opensource.org/licenses/MIT).
+
+##Census_analytical_tool.R
+The purpose of this code is to pull American Community Survey (ACS) 5-year data using the United States Census Bureau's Application Programming Interface (API), and to analyze that data for statistically significant trends over time in four different geographies: (1) aggregated TCC census tracts; (2) aggregated control census tracts; (3) counties with TCC sites; (4) California. More information about variables included in this code can be found in the annual TCC progress reports available on the [TCC evaluation resource page](https://innovation.luskin.ucla.edu/tracking-groundbreaking-climate-action/).
