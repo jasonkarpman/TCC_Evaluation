@@ -1,4 +1,4 @@
-# TCC Evaluation Code Repository
+# Transformative Climate Communities Evaluation Code Repository
 
 This repository archives code developed by the [UCLA Luskin Center for Innovation](https://innovation.luskin.ucla.edu/) (and collaborators) to evaluate the impacts of California’s [Transformative Climate Communities Program (TCC)](http://sgc.ca.gov/programs/tcc/) on awarded sites. Authorized by Assembly Bill 2722 in 2016, TCC funds the development and implementation of neighborhood-level transformative plans that include multiple projects to reduce greenhouse gas emissions. In addition to fighting climate change, the program empowers disadvantaged communities impacted by poverty and pollution to design projects that achieve their local economic, environmental, and health goals.
 
