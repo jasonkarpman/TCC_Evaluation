@@ -4,6 +4,13 @@
 #Author: Bo Liu 
 #Organization: UCLA Luskin Center for Innovation
 #Website: innovation.luskin.ucla.edu
+#Purpose: The purpose of this code is to pull American Community Survey (ACS) 5-year data 
+         #using the United States Census Bureau's Application Programming Interface (API), 
+         #and to analyze that data for statistically significant trends over time 
+         #in four different geographies: (1) aggregated TCC census tracts; 
+         #(2) aggregated control census tracts; (3) counties with TCC sites; 
+         #(4) California. More information about variables included in this code 
+         #can be found in the annual TCC progress reports posted here: https://innovation.luskin.ucla.edu/tracking-groundbreaking-climate-action/
 ##################################################
 
 #Load packages
