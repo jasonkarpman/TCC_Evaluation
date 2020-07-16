@@ -14,9 +14,9 @@
 ##################################################
 
 #Load packages
-library("tidyverse")
-library("tidycensus")
-library("reshape2")
+library(tidyverse)
+library(tidycensus)
+library(reshape2)
 
 #Set working directory
 setwd("...")
@@ -142,6 +142,57 @@ Watts_Control <- c("06037239601",
                    "06037237102",
                    "06037240401")
 
+Pacoima_TCC <- c("06037104500",
+                 "06037104310",
+                 "06037104320",
+                 "06037104701",
+                 "06037104810",
+                 "06037104610",
+                 "06037104620",
+                 "06037104404",
+                 "06037104703",
+                 "06037104821",
+                 "06037121210",
+                 "06037104704",
+                 "06037121222",
+                 "06037104401")
+
+Pacoima_Control <- c("06037201504",
+                     "06037122121",
+                     "06037123206",
+                     "06037120010",
+                     "06037201602",
+                     "06037120105",
+                     "06037204120",
+                     "06037187200",
+                     "06037185320",
+                     "06037199202",
+                     "06037121801",
+                     "06037185310",
+                     "06037203710",
+                     "06037203900",
+                     "06037221210",
+                     "06037204910",
+                     "06037185203",
+                     "06037122200",
+                     "06037134001",
+                     "06037218210",
+                     "06037201301",
+                     "06037115302",
+                     "06037122420",
+                     "06037122120",
+                     "06037120108",
+                     "06037119320",
+                     "06037117201",
+                     "06037204300",
+                     "06037106604",
+                     "06037203200",
+                     "06037201501",
+                     "06037204810",
+                     "06037204700",
+                     "06037106114",
+                     "06037127400")
+
 Counties <- c("Fresno County", "Los Angeles County", "San Bernardino County")
 
 years <- 2013:2018
@@ -149,7 +200,8 @@ years <- 2013:2018
 #create a dataframe that include all selected tracts
 n <- max(length(Fresno_TCC), length(Fresno_Control),
          length(Ontario_TCC), length(Ontario_Control),
-         length(Watts_TCC), length(Watts_Control))
+         length(Watts_TCC), length(Watts_Control),
+         length(Pacoima_TCC), length(Pacoima_Control))
 
 length(Fresno_TCC) <- n                      
 length(Fresno_Control) <- n
@@ -157,15 +209,19 @@ length(Ontario_TCC) <- n
 length(Ontario_Control) <- n
 length(Watts_TCC) <- n                      
 length(Watts_Control) <- n
+length(Pacoima_TCC) <- n 
+length(Pacoima_Control) <- n
 
 Tracts_wide <- do.call("cbind", list(data.frame(Fresno_TCC), data.frame(Fresno_Control),
                                      data.frame(Ontario_TCC), data.frame(Ontario_Control),
-                                     data.frame(Watts_TCC), data.frame(Watts_Control)))
+                                     data.frame(Watts_TCC), data.frame(Watts_Control),
+                                     data.frame(Pacoima_TCC), data.frame(Pacoima_Control)))
 
 Tracts <- na.omit(melt(Tracts_wide, 
                        measure.vars = c("Fresno_TCC", "Fresno_Control", 
                                         "Ontario_TCC", "Ontario_Control",
-                                        "Watts_TCC", "Watts_Control"),
+                                        "Watts_TCC", "Watts_Control",
+                                        "Pacoima_TCC", "Pacoima_Control"),
                        variable.name="group",
                        value.name="GEOID"))
 
