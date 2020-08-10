@@ -14,9 +14,9 @@
 ##################################################
 
 #Load packages
-library("tidyverse")
-library("tidycensus")
-library("reshape2")
+library(tidyverse)
+library(tidycensus)
+library(reshape2)
 
 #Set working directory
 setwd("...")
@@ -142,6 +142,57 @@ Watts_Control <- c("06037239601",
                    "06037237102",
                    "06037240401")
 
+Pacoima_TCC <- c("06037104500",
+                 "06037104310",
+                 "06037104320",
+                 "06037104701",
+                 "06037104810",
+                 "06037104610",
+                 "06037104620",
+                 "06037104404",
+                 "06037104703",
+                 "06037104821",
+                 "06037121210",
+                 "06037104704",
+                 "06037121222",
+                 "06037104401")
+
+Pacoima_Control <- c("06037201504",
+                     "06037122121",
+                     "06037123206",
+                     "06037120010",
+                     "06037201602",
+                     "06037120105",
+                     "06037204120",
+                     "06037187200",
+                     "06037185320",
+                     "06037199202",
+                     "06037121801",
+                     "06037185310",
+                     "06037203710",
+                     "06037203900",
+                     "06037221210",
+                     "06037204910",
+                     "06037185203",
+                     "06037122200",
+                     "06037134001",
+                     "06037218210",
+                     "06037201301",
+                     "06037115302",
+                     "06037122420",
+                     "06037122120",
+                     "06037120108",
+                     "06037119320",
+                     "06037117201",
+                     "06037204300",
+                     "06037106604",
+                     "06037203200",
+                     "06037201501",
+                     "06037204810",
+                     "06037204700",
+                     "06037106114",
+                     "06037127400")
+
 Counties <- c("Fresno County", "Los Angeles County", "San Bernardino County")
 
 years <- 2013:2018
@@ -149,7 +200,8 @@ years <- 2013:2018
 #create a dataframe that include all selected tracts
 n <- max(length(Fresno_TCC), length(Fresno_Control),
          length(Ontario_TCC), length(Ontario_Control),
-         length(Watts_TCC), length(Watts_Control))
+         length(Watts_TCC), length(Watts_Control),
+         length(Pacoima_TCC), length(Pacoima_Control))
 
 length(Fresno_TCC) <- n                      
 length(Fresno_Control) <- n
@@ -157,15 +209,19 @@ length(Ontario_TCC) <- n
 length(Ontario_Control) <- n
 length(Watts_TCC) <- n                      
 length(Watts_Control) <- n
+length(Pacoima_TCC) <- n 
+length(Pacoima_Control) <- n
 
 Tracts_wide <- do.call("cbind", list(data.frame(Fresno_TCC), data.frame(Fresno_Control),
                                      data.frame(Ontario_TCC), data.frame(Ontario_Control),
-                                     data.frame(Watts_TCC), data.frame(Watts_Control)))
+                                     data.frame(Watts_TCC), data.frame(Watts_Control),
+                                     data.frame(Pacoima_TCC), data.frame(Pacoima_Control)))
 
 Tracts <- na.omit(melt(Tracts_wide, 
                        measure.vars = c("Fresno_TCC", "Fresno_Control", 
                                         "Ontario_TCC", "Ontario_Control",
-                                        "Watts_TCC", "Watts_Control"),
+                                        "Watts_TCC", "Watts_Control",
+                                        "Pacoima_TCC", "Pacoima_Control"),
                        variable.name="group",
                        value.name="GEOID"))
 
@@ -2323,7 +2379,7 @@ Tran_results1 <- Tran_results[!Tran_results$variable%in%c("commute_car_per","com
 #Combine results from all six indicator groups
 TCC_results <- rbind(Dem_results, Econ_results, En_results, Hlth_results, Hous_results, Tran_results1)
 
-#Perform significance test across multiple-year census data with 2013 as the base year
+#Perform significance testing over time with 2013 as the base year
 TCC_results$var <- gsub("_moe", "", TCC_results$variable)
 TCC_results1 <- TCC_results %>% 
                     rowwise() %>% 
@@ -2350,17 +2406,202 @@ TCC_results2$var <- factor(TCC_results2$var, levels = c("Pop_tot", "Hisp_per", "
                                                         "commute_car_alone_per", "commute_car_carpool_per", "commute_transit_per",
                                                         "commute_walk_per", "commute_bike_per", "commute_other_per"))
 TCC_results3 <- TCC_results2 %>% 
-                    group_by(group, var) %>% 
-                        mutate(growth_per_base2013 = (estimate - first(estimate))/first(estimate) * 100) %>%
-                        mutate(statsig_90per_value = (estimate - first(estimate)) / ((year - first(year))/5)^(1/2) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
-                        mutate(statsig_90per = ifelse( statsig_90per_value < 1.645, "nonsignificant", "significant")) %>%
-                        mutate(statsig_95per_value = (estimate - first(estimate)) / ((year - first(year))/5)^(1/2) / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
-                        mutate(statsig_95per = ifelse( statsig_95per_value < 1.96, "nonsignificant", "significant")) %>%
-                        arrange(group, var)
+                group_by(group, var) %>% 
+                mutate(growth_per_base2013 = (estimate - first(estimate))/first(estimate) * 100) %>%
+                mutate(statsig_90per_value = (estimate - first(estimate)) / ((year - first(year))/5)^(1/2) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                mutate(statsig_90per = ifelse(statsig_90per_value < 1.645, "nonsignificant", "significant")) %>%
+                mutate(statsig_95per_value = (estimate - first(estimate)) / ((year - first(year))/5)^(1/2) / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                mutate(statsig_95per = ifelse(statsig_95per_value < 1.96, "nonsignificant", "significant")) %>%
+                arrange(group, var)
+
+#fixed an error in the significance testing - absolute values
+#get differences in results and find the variables that need to be updated
+TCC_results3_1 <- TCC_results2 %>% 
+                  group_by(group, var) %>% 
+                  mutate(growth_per_base2013 = (estimate - first(estimate))/first(estimate) * 100) %>%
+                  mutate(statsig_90per_value = abs(estimate - first(estimate)) / ((year - first(year))/5)^(1/2) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                  mutate(statsig_90per = ifelse(statsig_90per_value < 1.645, "nonsignificant", "significant")) %>%
+                  mutate(statsig_95per_value = abs(estimate - first(estimate)) / ((year - first(year))/5)^(1/2) / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                  mutate(statsig_95per = ifelse(statsig_95per_value < 1.96, "nonsignificant", "significant")) %>%
+                  arrange(group, var)
+
+TCC_results3_diff <- setdiff(TCC_results3_1 %>% 
+                               select(-c(7,9)), 
+                             TCC_results3 %>% 
+                               select(-c(7,9))) %>% 
+                     filter(year == 2018)
+                              
+
+                arrange(site, var, year)
+
+#Perform significance testing across grographies - TCC vs. control
+TCC_results4 <- TCC_results2 %>% 
+                filter(!group %in% c(Counties, "California")) %>% 
+                separate(group, c("site", "group"), "_") %>% 
+                group_by(site, var, year) %>% 
+                mutate(diff = (estimate - first(estimate))/first(estimate) * 100) %>%
+                mutate(statsig_90per_value = abs(estimate - first(estimate)) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                mutate(statsig_90per = ifelse(statsig_90per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_90per_value < 1.645, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                mutate(statsig_95per_value = abs(estimate - first(estimate))  / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                mutate(statsig_95per = ifelse(statsig_95per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_95per_value < 1.96, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                arrange(site, var, year)
+"Fresno County", "Los Angeles County", "San Bernardino County"
+
+#Perform significance testing across grographies - TCC vs. county
+TCC_results5 <- TCC_results2 %>% 
+                filter(!group %in% c(Counties, "California")) %>% 
+                separate(group, c("site", "group"), "_") %>% 
+                filter(group == "TCC") %>% 
+                bind_rows(TCC_results2 %>% 
+                          filter(group %in% Counties) %>%
+                          mutate(site = case_when(group == "Fresno County" ~ "Fresno",
+                                                  group == "Los Angeles County" ~ "Watts",
+                                                  TRUE ~ "Ontario")),
+                          TCC_results2 %>% 
+                            filter(group == "Los Angeles County") %>%
+                            mutate(site = "Pacoima")) %>% 
+                group_by(site, var, year) %>% 
+                mutate(diff = (estimate - first(estimate))/first(estimate) * 100) %>%
+                mutate(statsig_90per_value = abs(estimate - first(estimate)) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                mutate(statsig_90per = ifelse(statsig_90per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_90per_value < 1.645, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                mutate(statsig_95per_value = abs(estimate - first(estimate))  / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                mutate(statsig_95per = ifelse(statsig_95per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_95per_value < 1.96, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                arrange(site, var, year)
+
+#Perform significance testing across grographies - control vs. county
+TCC_results6 <- TCC_results2 %>% 
+                filter(!group %in% c(Counties, "California")) %>% 
+                separate(group, c("site", "group"), "_") %>% 
+                filter(group == "Control") %>% 
+                bind_rows(TCC_results2 %>% 
+                            filter(group %in% Counties) %>%
+                            mutate(site = case_when(group == "Fresno County" ~ "Fresno",
+                                                    group == "Los Angeles County" ~ "Watts",
+                                                    TRUE ~ "Ontario")),
+                          TCC_results2 %>% 
+                            filter(group == "Los Angeles County") %>%
+                            mutate(site = "Pacoima")) %>% 
+                group_by(site, var, year) %>% 
+                mutate(diff = (estimate - first(estimate))/first(estimate) * 100) %>%
+                mutate(statsig_90per_value = abs(estimate - first(estimate)) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                mutate(statsig_90per = ifelse(statsig_90per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_90per_value < 1.645, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                mutate(statsig_95per_value = abs(estimate - first(estimate))  / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                mutate(statsig_95per = ifelse(statsig_95per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_95per_value < 1.96, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                arrange(site, var, year)
+
+#Perform significance testing across grographies - TCC vs. state
+TCC_results7 <- TCC_results2 %>% 
+                filter(!group %in% c(Counties, "California")) %>% 
+                separate(group, c("site", "group"), "_") %>% 
+                filter(group == "TCC") %>% 
+                bind_rows(TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Fresno"),
+                          TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Watts"),
+                          TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Ontario"),
+                          TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Pacoima")) %>% 
+                group_by(site, var, year) %>% 
+                mutate(diff = (estimate - first(estimate))/first(estimate) * 100) %>%
+                mutate(statsig_90per_value = abs(estimate - first(estimate)) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                mutate(statsig_90per = ifelse(statsig_90per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_90per_value < 1.645, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                mutate(statsig_95per_value = abs(estimate - first(estimate))  / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                mutate(statsig_95per = ifelse(statsig_95per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_95per_value < 1.96, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                arrange(site, var, year)
+
+#Perform significance testing across grographies - control vs. state
+TCC_results8 <- TCC_results2 %>% 
+                filter(!group %in% c(Counties, "California")) %>% 
+                separate(group, c("site", "group"), "_") %>% 
+                filter(group == "Control") %>% 
+                bind_rows(TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Fresno"),
+                          TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Watts"),
+                          TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Ontario"),
+                          TCC_results2 %>% 
+                            filter(group == "California") %>%
+                            mutate(site = "Pacoima")) %>% 
+                group_by(site, var, year) %>% 
+                mutate(diff = (estimate - first(estimate))/first(estimate) * 100) %>%
+                mutate(statsig_90per_value = abs(estimate - first(estimate)) / ((MOE/1.645)^2 + (first(MOE)/1.645)^2)^(1/2)) %>%
+                mutate(statsig_90per = ifelse(statsig_90per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_90per_value < 1.645, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                mutate(statsig_95per_value = abs(estimate - first(estimate))  / ((MOE/1.96)^2 + (first(MOE)/1.96)^2)^(1/2)) %>%
+                mutate(statsig_95per = ifelse(statsig_95per_value == 0, 
+                                              NA, 
+                                              ifelse(statsig_95per_value < 1.96, 
+                                                     "nonsignificant", 
+                                                     "significant"))) %>%
+                arrange(site, var, year)
+
+#combine significance testing across all geographies
+TCC_sig_geo <- bind_rows(TCC_results4 %>% 
+                           filter(group != "TCC") %>% 
+                           mutate(between = "TCC-Control"),
+                         TCC_results5 %>% 
+                           filter(group != "TCC") %>% 
+                           mutate(between = "TCC-County"),
+                         TCC_results7 %>% 
+                           filter(group != "TCC") %>% 
+                           mutate(between = "TCC-State"),
+                         TCC_results6 %>% 
+                           filter(group != "Control") %>% 
+                           mutate(between = "TCC-County"),
+                         TCC_results8 %>% 
+                           filter(group != "Control") %>% 
+                           mutate(between = "TCC-State")) %>% 
+                select(-group) %>% 
+                arrange(site, var, year, between)
 
 #Generate output file
-write.csv(TCC_results3, file = "TCC_fullresults.csv")
+write.csv(TCC_results3_1, file = "Sigtest_temporal.csv")
+write.csv(TCC_sig_geo, file = "Sigtest_spatial_all.csv")
 
-
+write.csv(TCC_results3_diff, file = "Sigtest_temporal_R1_errorfix.csv")
 
 
